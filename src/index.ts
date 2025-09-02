@@ -44,7 +44,7 @@ server.registerTool(
       model: z.string()
         .optional()
         .default("inception/mercury-coder")
-        .describe("OpenAI model to use")
+        .describe("OpenRouter model to use")
     },
   },
   async ({ filePath, rootPath, model = "inception/mercury-coder" }) => {

@@ -1,6 +1,6 @@
 {
   "name": "godoc-mcp",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "AI-powered MCP server that intelligently fetches Go package documentation using GoDoc and OpenRouter",
   "main": "build/index.js",
   "bin": {
