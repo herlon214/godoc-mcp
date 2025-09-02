@@ -1,0 +1,56 @@
+# Source files (TypeScript will be compiled to build/)
+src/
+tsconfig.json
+
+# Development files
+.env
+.env.local
+.env.*.local
+
+# Git files
+.git/
+.gitignore
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Coverage and testing
+coverage/
+.nyc_output/
+test/
+tests/
+__tests__/
+
+# Dependency directories
+node_modules/
+
+# Runtime files
+pids/
+*.pid
+*.seed
+
+# Optional files
+.claude/
+pnpm-lock.yaml
+yarn.lock
+
+# Build artifacts (we include build/ in files array)
+# But exclude any temp build files
+build/*.map
+
+# Documentation files  
+*.md
+README.md
+CLAUDE.md

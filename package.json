@@ -1,0 +1,52 @@
+{
+  "name": "godoc-mcp",
+  "version": "1.0.0",
+  "description": "AI-powered MCP server that intelligently fetches Go package documentation using GoDoc and OpenRouter",
+  "main": "build/index.js",
+  "bin": {
+    "godoc-mcp": "build/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "tsc && node build/index.js",
+    "prepublishOnly": "npm run build",
+    "prepack": "npm run build",
+    "dev": "tsc --watch",
+    "clean": "rm -rf build"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol", 
+    "golang",
+    "go",
+    "documentation",
+    "godoc",
+    "ai",
+    "claude",
+    "openrouter",
+    "developer-tools"
+  ],
+  "author": "Herlon Aguiar <herlon214@gmail.com>",
+  "license": "MIT",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/herlon214/godoc-mcp.git"
+  },
+  "homepage": "https://github.com/herlon214/godoc-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/herlon214/godoc-mcp/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.4",
+    "openai": "^5.16.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "typescript": "^5.9.2"
+  }
+}
