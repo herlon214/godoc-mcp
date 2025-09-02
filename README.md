@@ -28,36 +28,11 @@ Instead of manually running `go doc package.Type` commands, just point it at you
 ### Prerequisites
 
 - **Go** 1.19+ (for `go doc` command)
-- **Node.js** 18+ and npm
 - An [OpenRouter](https://openrouter.ai) API key
 
-### Setup
+### Quick Setup with npx (Recommended)
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/herlon214/godoc-mcp.git
-   cd godoc-mcp
-   ```
-
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-
-3. **Build the project**:
-   ```bash
-   npm run build
-   ```
-
-4. **Set up environment variables**:
-   ```bash
-   export OPENROUTER_API_KEY="your-api-key-here"
-   ```
-   
-   Or create a `.env` file:
-   ```
-   OPENROUTER_API_KEY=your-api-key-here
-   ```
+No installation required! Just use `npx` to run the latest version automatically.
 
 ## 🔑 OpenRouter Configuration
 
@@ -115,22 +90,21 @@ To use this MCP server with [Claude Code](https://claude.ai/code), you need to a
 
 ```json
 {
-  "name": "godoc-mcp", 
-  "command": "node",
-  "args": ["/path/to/godoc-mcp/build/index.js"],
+  "name": "godoc-mcp",
+  "command": "npx",
+  "args": ["-y", "godoc-mcp"],
   "env": {
     "OPENROUTER_API_KEY": "your-api-key-here"
   }
 }
 ```
 
-### Step 2: Update the Path
+### Step 2: Get Your OpenRouter API Key
 
-Replace `/path/to/godoc-mcp` with the actual path where you cloned this repository.
-
-For example:
-- macOS/Linux: `/Users/yourname/projects/godoc-mcp/build/index.js`
-- Windows: `C:\Users\yourname\projects\godoc-mcp\build\index.js`
+1. Visit [openrouter.ai](https://openrouter.ai) and create an account
+2. Add credits to your account ($5-10 is plenty to start)
+3. Go to [Keys](https://openrouter.ai/keys) and create an API key
+4. Replace `your-api-key-here` with your actual API key
 
 ### Step 3: Restart Claude Code
 
@@ -143,22 +117,6 @@ You should see the "GoDoc Search" tool available when working with Go files. You
 1. Opening a Go project in Claude Code
 2. Asking Claude to analyze a Go file's documentation  
 3. Claude should automatically use the godoc tool to fetch relevant documentation
-
-### Alternative: Global Installation
-
-For easier access, you can also install globally:
-
-```bash
-# Build and link globally
-npm run build
-npm link
-
-# Then in Claude Code settings use:
-{
-  "name": "godoc-mcp",
-  "command": "godoc-mcp"  
-}
-```
 
 ## 💡 Usage Examples
 
