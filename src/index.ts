@@ -15,7 +15,7 @@ const execAsync = promisify(exec);
 async function findGoModRoot(filePath: string): Promise<string | null> {
   let currentDir = dirname(resolve(filePath));
   const root = resolve('/');
-  
+
   while (currentDir !== root) {
     try {
       const goModPath = join(currentDir, 'go.mod');
@@ -31,7 +31,7 @@ async function findGoModRoot(filePath: string): Promise<string | null> {
       currentDir = parentDir;
     }
   }
-  
+
   // Return null if no go.mod found
   return null;
 }
@@ -77,7 +77,7 @@ server.registerTool(
     try {
       // Find the root path by looking for go.mod (may be null)
       const rootPath = await findGoModRoot(filePath);
-      
+
       // Read the Go file
       const fileContent = await readFile(filePath, 'utf-8');
 
@@ -106,7 +106,7 @@ go doc go.opentelemetry.io/otel/sdk/trace.TracerProvider.Shutdown # Dependency m
 ${fileContent}
 \`\`\`
 
-Just give me the \`go doc\` commands, separated one in each line. Do not say anything else. Focus on external packages and avoid golang's standard library.`;
+Just give me the \`go doc\` commands, separated one in each line. Do not say anything else. Avoid golang's standard library.`;
 
       const response = await client.chat.completions.create({
         model,
@@ -132,7 +132,7 @@ Just give me the \`go doc\` commands, separated one in each line. Do not say any
         commands.map(async (command) => {
           try {
             // Insert -C flag after "go doc" only if rootPath was found
-            const modifiedCommand = rootPath 
+            const modifiedCommand = rootPath
               ? command.trim().replace('go doc', `go doc -C ${rootPath}`)
               : command.trim();
             const { stdout } = await execAsync(modifiedCommand);
@@ -146,6 +146,12 @@ Just give me the \`go doc\` commands, separated one in each line. Do not say any
 
       // Filter out failed commands (null results)
       const successfulResults = docResults.filter(result => result !== null);
+
+      if (successfulResults.length === 0) {
+        return {
+          content: [{ type: "text", text: "No documentation found for the external packages in this file." }],
+        };
+      }
 
       const finalResult = successfulResults.join('\n\n');
 
