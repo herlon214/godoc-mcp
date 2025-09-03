@@ -3,11 +3,38 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import OpenAI from "openai";
-import { readFile } from "fs/promises";
+import { readFile, stat } from "fs/promises";
 import { exec } from "child_process";
 import { promisify } from "util";
+import { dirname, join, resolve } from "path";
 
 const execAsync = promisify(exec);
+
+// Find the root of a Go project by walking up the directory tree to find go.mod
+// Returns the root path if found, null if not found
+async function findGoModRoot(filePath: string): Promise<string | null> {
+  let currentDir = dirname(resolve(filePath));
+  const root = resolve('/');
+  
+  while (currentDir !== root) {
+    try {
+      const goModPath = join(currentDir, 'go.mod');
+      await stat(goModPath);
+      return currentDir;
+    } catch (error) {
+      // go.mod not found in current directory, move up
+      const parentDir = dirname(currentDir);
+      if (parentDir === currentDir) {
+        // Reached the root without finding go.mod
+        break;
+      }
+      currentDir = parentDir;
+    }
+  }
+  
+  // Return null if no go.mod found
+  return null;
+}
 
 // Create the server
 const server = new McpServer({
@@ -40,15 +67,17 @@ server.registerTool(
     description: "Uses GoDoc to search for information about Go packages enhanced with AI",
     inputSchema: {
       filePath: z.string().describe("Path to the Go file to analyze"),
-      rootPath: z.string().describe("Root path of the Go project (where go.mod is located)"),
       model: z.string()
         .optional()
         .default("inception/mercury-coder")
         .describe("OpenRouter model to use")
     },
   },
-  async ({ filePath, rootPath, model = "inception/mercury-coder" }) => {
+  async ({ filePath, model = "inception/mercury-coder" }) => {
     try {
+      // Find the root path by looking for go.mod (may be null)
+      const rootPath = await findGoModRoot(filePath);
+      
       // Read the Go file
       const fileContent = await readFile(filePath, 'utf-8');
 
@@ -98,23 +127,27 @@ Just give me the \`go doc\` commands, separated one in each line. Do not say any
         };
       }
 
-      // Execute each go doc command and collect the results
-      const docResults: string[] = [];
+      // Execute all go doc commands concurrently
+      const docResults = await Promise.all(
+        commands.map(async (command) => {
+          try {
+            // Insert -C flag after "go doc" only if rootPath was found
+            const modifiedCommand = rootPath 
+              ? command.trim().replace('go doc', `go doc -C ${rootPath}`)
+              : command.trim();
+            const { stdout } = await execAsync(modifiedCommand);
+            return `=== ${modifiedCommand} ===\n${stdout}`;
+          } catch {
+            // Command returned non-zero exit code, skip this result
+            return null;
+          }
+        })
+      );
 
-      for (const command of commands) {
-        try {
-          // Insert -C flag after "go doc" to specify the working directory
-          const modifiedCommand = command.trim().replace('go doc', `go doc -C ${rootPath}`);
-          const { stdout } = await execAsync(modifiedCommand);
-          docResults.push(`=== ${modifiedCommand} ===\n${stdout}`);
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-          const modifiedCommand = command.trim().replace('go doc', `go doc -C ${rootPath}`);
-          docResults.push(`=== ${modifiedCommand} ===\nError: ${errorMessage}`);
-        }
-      }
+      // Filter out failed commands (null results)
+      const successfulResults = docResults.filter(result => result !== null);
 
-      const finalResult = docResults.join('\n\n');
+      const finalResult = successfulResults.join('\n\n');
 
       return {
         content: [{ type: "text", text: finalResult }],

@@ -8,7 +8,14 @@ Instead of manually searching `go doc`, this tool analyzes your Go files and aut
 
 ### 1. Add to Claude Code
 
-Go to **Settings → MCP Servers** and add:
+Run this command in your terminal:
+
+```bash
+claude mcp add godoc-mcp --scope user --env OPENROUTER_API_KEY=YOUR_KEY_HERE \
+  -- npx -y godoc-mcp
+```
+
+Or manually add using json:
 
 ```json
 {
